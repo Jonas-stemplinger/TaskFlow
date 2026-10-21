@@ -21,6 +21,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TodoService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<DashboardService>();
 
 //Wird quasi in dem Dependency Injection der Hasher registriert
 //Er gibt uns zwei Methoden quasi einmal VerifyHashedPassword() und HashPassword()

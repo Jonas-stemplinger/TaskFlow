@@ -17,15 +17,11 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<AppUser>> Create(
-        [FromBody] CreateUserRequest request)
+    public async Task<ActionResult<AppUser>> Create([FromBody] CreateUserRequest request)
     {
         var user = await _userService.CreateAsync(request);
 
-        return CreatedAtAction(
-            nameof(GetById),
-            new { id = user.Id },
-            user);
+        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
     }
 
     [HttpGet]

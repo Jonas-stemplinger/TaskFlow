@@ -13,6 +13,7 @@ namespace TaskFlow.Data
         public DbSet<AppUser> Users => Set<AppUser>();
 
         public DbSet<Project> Projects => Set<Project>();
+        public DbSet<Dashboard> Dashboards => Set<Dashboard>();
 
         public DbSet<TaskItem> Tasks => Set<TaskItem>();
 

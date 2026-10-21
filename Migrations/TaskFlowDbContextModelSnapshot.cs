@@ -49,6 +49,22 @@ namespace TaskFlow.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("TaskFlow.Models.Dashboard", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Dashboards");
+                });
+
             modelBuilder.Entity("TaskFlow.Models.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -94,6 +110,38 @@ namespace TaskFlow.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("Tasks");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.TaskModelDashboard", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("DashboardId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DashboardId1")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DashboardId2")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DashboardId");
+
+                    b.HasIndex("DashboardId1");
+
+                    b.HasIndex("DashboardId2");
+
+                    b.ToTable("TaskModelDashboard");
                 });
 
             modelBuilder.Entity("TaskFlow.Models.TodoItem", b =>
@@ -143,6 +191,21 @@ namespace TaskFlow.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("TaskFlow.Models.TaskModelDashboard", b =>
+                {
+                    b.HasOne("TaskFlow.Models.Dashboard", null)
+                        .WithMany("ListHighPrio")
+                        .HasForeignKey("DashboardId");
+
+                    b.HasOne("TaskFlow.Models.Dashboard", null)
+                        .WithMany("ListLowPrio")
+                        .HasForeignKey("DashboardId1");
+
+                    b.HasOne("TaskFlow.Models.Dashboard", null)
+                        .WithMany("ListMidPrio")
+                        .HasForeignKey("DashboardId2");
+                });
+
             modelBuilder.Entity("TaskFlow.Models.TodoItem", b =>
                 {
                     b.HasOne("TaskFlow.Models.TaskItem", "TaskItem")
@@ -157,6 +220,15 @@ namespace TaskFlow.Migrations
             modelBuilder.Entity("TaskFlow.Models.AppUser", b =>
                 {
                     b.Navigation("Projects");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.Dashboard", b =>
+                {
+                    b.Navigation("ListHighPrio");
+
+                    b.Navigation("ListLowPrio");
+
+                    b.Navigation("ListMidPrio");
                 });
 
             modelBuilder.Entity("TaskFlow.Models.Project", b =>
