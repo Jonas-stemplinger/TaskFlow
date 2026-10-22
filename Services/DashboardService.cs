@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Win32.SafeHandles;
-using System.ComponentModel;
 using TaskFlow.Data;
 using TaskFlow.DTOs;
 using TaskFlow.Models;
@@ -16,52 +14,98 @@ public class DashboardService
         _context = context;
     }
 
-    public async Task<Dashboard> CreateDashboard(int userId, Dashboard dashboard)
+    public async Task<List<DashboardTodoDto>> GetDashboardByUser(int userId)
     {
-        var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+        return await _context.DashboardTodos
+            .AsNoTracking()
+            .Where(t => t.Dashboard.UserId == userId)
+            .OrderBy(t => t.Position)
+            .Select(t => new DashboardTodoDto
+            {
+                TodoId = t.TodoId,
+                TaskId = t.Todo.TaskItemId,
+                Priority = t.Priority,
+                Position = t.Position
+            })
+            .ToListAsync();
+    }
 
-        if (!userExists) { return null!; }
+    public async Task<bool> UpdateAsync(
+        int userId,
+        UpdateDashboardRequest request)
+    {
+        var userExists = await _context.Users
+            .AnyAsync(u => u.Id == userId);
 
-        var newDashboard = new Dashboard
+        if (!userExists)
         {
-            UserId = userId,
-            ListHighPrio = dashboard.ListHighPrio,
-            ListMidPrio = dashboard.ListMidPrio,
-            ListLowPrio = dashboard.ListLowPrio
-        };
+            return false;
+        }
 
-        _context.Dashboards.Add(newDashboard);
+        var validPriorities = new[] { "low", "medium", "high" };
 
-        await _context.SaveChangesAsync();
+        if (request.Todos == null ||
+            request.Todos.Any(t =>
+                !validPriorities.Contains(t.Priority) ||
+                t.Position < 0))
+        {
+            return false;
+        }
 
-        return newDashboard;
-    }
+        if (request.Todos.Select(t => t.TodoId).Distinct().Count()
+            != request.Todos.Count)
+        {
+            return false;
+        }
 
-    public async Task<bool> CheckIfUserHasADashboard(int userId)
-    {
-        var userHasDashboard = await _context.Dashboards.AnyAsync(u => u.UserId == userId);
+        var todoIds = request.Todos.Select(t => t.TodoId).ToList();
 
-        return userHasDashboard;
-    }
+        var validTodos = await _context.Todos.Where(t => todoIds.Contains(t.Id) && t.TaskItem.Project.UserId == userId)
+            .Select(t => new
+            {
+                t.Id,
+                t.TaskItemId
+            })
+            .ToListAsync();
 
-    public async Task<Dashboard?> GetDashboardByUser(int userId)
-    {
-        return await _context.Dashboards
-            .Include(d => d.ListHighPrio)
-            .Include(d => d.ListMidPrio)
-            .Include(d => d.ListLowPrio)
+        if (validTodos.Count != todoIds.Count)
+        {
+            return false;
+        }
+
+        foreach (var item in request.Todos)
+        {
+            if (!validTodos.Any(t => t.Id == item.TodoId && t.TaskItemId == item.TaskId))
+            {
+                return false;
+            }
+        }
+
+        var dashboard = await _context.Dashboards
+            .Include(d => d.Todos)
             .FirstOrDefaultAsync(d => d.UserId == userId);
-    }
 
-    public async Task<bool> UpdateAsync(int userId, Dashboard dashboard)
-    {
-        var currentDashboard = await _context.Dashboards.FirstOrDefaultAsync(d => d.UserId == userId);
+        if (dashboard == null)
+        {
+            dashboard = new Dashboard
+            {
+                UserId = userId
+            };
 
-        if (currentDashboard == null) { return false; }
+            _context.Dashboards.Add(dashboard);
+        }
 
-        currentDashboard.ListMidPrio = dashboard.ListMidPrio;
-        currentDashboard.ListLowPrio = dashboard.ListLowPrio;
-        currentDashboard.ListHighPrio = dashboard.ListHighPrio;
+        _context.DashboardTodos.RemoveRange(dashboard.Todos);
+
+        foreach (var item in request.Todos)
+        {
+            dashboard.Todos.Add(new TaskModelDashboard
+            {
+                TodoId = item.TodoId,
+                Priority = item.Priority,
+                Position = item.Position
+            });
+        }
 
         await _context.SaveChangesAsync();
 

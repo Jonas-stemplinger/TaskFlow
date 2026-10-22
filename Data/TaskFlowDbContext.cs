@@ -15,6 +15,8 @@ namespace TaskFlow.Data
         public DbSet<Project> Projects => Set<Project>();
         public DbSet<Dashboard> Dashboards => Set<Dashboard>();
 
+        public DbSet<TaskModelDashboard> DashboardTodos => Set<TaskModelDashboard>();
+
         public DbSet<TaskItem> Tasks => Set<TaskItem>();
 
         public DbSet<TodoItem> Todos => Set<TodoItem>();
@@ -43,6 +45,32 @@ namespace TaskFlow.Data
 
             modelBuilder.Entity<AppUser>()
                 .HasIndex(u => u.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<Dashboard>()
+                .HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Dashboard>()
+                .HasIndex(d => d.UserId)
+                .IsUnique();
+
+            modelBuilder.Entity<TaskModelDashboard>()
+                .HasOne(t => t.Dashboard)
+                .WithMany(d => d.Todos)
+                .HasForeignKey(t => t.DashboardId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TaskModelDashboard>()
+                .HasOne(t => t.Todo)
+                .WithMany()
+                .HasForeignKey(t => t.TodoId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TaskModelDashboard>()
+                .HasIndex(t => new { t.DashboardId, t.TodoId })
                 .IsUnique();
         }
     }

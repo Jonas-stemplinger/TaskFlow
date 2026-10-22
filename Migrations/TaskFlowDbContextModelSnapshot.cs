@@ -62,6 +62,9 @@ namespace TaskFlow.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
                     b.ToTable("Dashboards");
                 });
 
@@ -120,28 +123,27 @@ namespace TaskFlow.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("DashboardId")
+                    b.Property<int>("DashboardId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DashboardId1")
+                    b.Property<int>("Position")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DashboardId2")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
+                    b.Property<string>("Priority")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("TodoId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DashboardId");
+                    b.HasIndex("TodoId");
 
-                    b.HasIndex("DashboardId1");
+                    b.HasIndex("DashboardId", "TodoId")
+                        .IsUnique();
 
-                    b.HasIndex("DashboardId2");
-
-                    b.ToTable("TaskModelDashboard");
+                    b.ToTable("DashboardTodos");
                 });
 
             modelBuilder.Entity("TaskFlow.Models.TodoItem", b =>
@@ -169,6 +171,17 @@ namespace TaskFlow.Migrations
                     b.ToTable("Todos");
                 });
 
+            modelBuilder.Entity("TaskFlow.Models.Dashboard", b =>
+                {
+                    b.HasOne("TaskFlow.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TaskFlow.Models.Project", b =>
                 {
                     b.HasOne("TaskFlow.Models.AppUser", "User")
@@ -193,17 +206,21 @@ namespace TaskFlow.Migrations
 
             modelBuilder.Entity("TaskFlow.Models.TaskModelDashboard", b =>
                 {
-                    b.HasOne("TaskFlow.Models.Dashboard", null)
-                        .WithMany("ListHighPrio")
-                        .HasForeignKey("DashboardId");
+                    b.HasOne("TaskFlow.Models.Dashboard", "Dashboard")
+                        .WithMany("Todos")
+                        .HasForeignKey("DashboardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("TaskFlow.Models.Dashboard", null)
-                        .WithMany("ListLowPrio")
-                        .HasForeignKey("DashboardId1");
+                    b.HasOne("TaskFlow.Models.TodoItem", "Todo")
+                        .WithMany()
+                        .HasForeignKey("TodoId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.HasOne("TaskFlow.Models.Dashboard", null)
-                        .WithMany("ListMidPrio")
-                        .HasForeignKey("DashboardId2");
+                    b.Navigation("Dashboard");
+
+                    b.Navigation("Todo");
                 });
 
             modelBuilder.Entity("TaskFlow.Models.TodoItem", b =>
@@ -224,11 +241,7 @@ namespace TaskFlow.Migrations
 
             modelBuilder.Entity("TaskFlow.Models.Dashboard", b =>
                 {
-                    b.Navigation("ListHighPrio");
-
-                    b.Navigation("ListLowPrio");
-
-                    b.Navigation("ListMidPrio");
+                    b.Navigation("Todos");
                 });
 
             modelBuilder.Entity("TaskFlow.Models.Project", b =>
