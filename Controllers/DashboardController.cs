@@ -41,4 +41,17 @@ public class DashboardController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpDelete("{todoId:int}")]
+    public async Task<IActionResult> DeleteTodo(int userId, int todoId)
+    {
+        var deleted = await _dashboardService.DeleteDashboardTodoAsync(userId, todoId);
+
+        if (!deleted)
+        {
+            return NotFound("Todo wurde im Dashboard nicht gefunden");
+        }
+
+        return NoContent();
+    }
 }

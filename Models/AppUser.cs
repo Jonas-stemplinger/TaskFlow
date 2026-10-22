@@ -1,23 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using TaskFlow.Models;
 
-namespace TaskFlow.Models
+public class AppUser
 {
-    public class AppUser
-    {
-        public int Id { get; set; }
-        
-        [Required]
-        public string Name { get; set; } = string.Empty;
-        
-        [Required]
-        //[EmailAddress]
-        public string Email { get; set; } = string.Empty;
+    public int Id { get; set; }
 
-        [Required]
-        [JsonIgnore] //Passwörter dürfen auf keinem Fall irgendwie über die Api geschickt werden
-        public string Password { get; set; } = string.Empty;    
+    public string Name { get; set; } = string.Empty;
 
-        public List<Project> Projects { get; set; } = new();
-    }
+    public string Email { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public string Password { get; set; } = string.Empty;
+
+    public List<Project> Projects { get; set; } = new();
+
+    public List<Teamproject> Teamprojects { get; set; } = new();
 }

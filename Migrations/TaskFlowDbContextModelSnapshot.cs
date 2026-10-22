@@ -21,7 +21,7 @@ namespace TaskFlow.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TaskFlow.Models.AppUser", b =>
+            modelBuilder.Entity("AppUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -47,6 +47,21 @@ namespace TaskFlow.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("AppUserTeamproject", b =>
+                {
+                    b.Property<int>("TeamprojectsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TeamprojectsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("AppUserTeamproject");
                 });
 
             modelBuilder.Entity("TaskFlow.Models.Dashboard", b =>
@@ -83,6 +98,9 @@ namespace TaskFlow.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("isTeamProject")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
@@ -104,6 +122,9 @@ namespace TaskFlow.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TeamprojectId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -111,6 +132,8 @@ namespace TaskFlow.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("TeamprojectId");
 
                     b.ToTable("Tasks");
                 });
@@ -146,6 +169,26 @@ namespace TaskFlow.Migrations
                     b.ToTable("DashboardTodos");
                 });
 
+            modelBuilder.Entity("TaskFlow.Models.Teamproject", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsTeamProject")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Teamprojects");
+                });
+
             modelBuilder.Entity("TaskFlow.Models.TodoItem", b =>
                 {
                     b.Property<int>("Id")
@@ -171,9 +214,24 @@ namespace TaskFlow.Migrations
                     b.ToTable("Todos");
                 });
 
+            modelBuilder.Entity("AppUserTeamproject", b =>
+                {
+                    b.HasOne("TaskFlow.Models.Teamproject", null)
+                        .WithMany()
+                        .HasForeignKey("TeamprojectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TaskFlow.Models.Dashboard", b =>
                 {
-                    b.HasOne("TaskFlow.Models.AppUser", "User")
+                    b.HasOne("AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -184,7 +242,7 @@ namespace TaskFlow.Migrations
 
             modelBuilder.Entity("TaskFlow.Models.Project", b =>
                 {
-                    b.HasOne("TaskFlow.Models.AppUser", "User")
+                    b.HasOne("AppUser", "User")
                         .WithMany("Projects")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -200,6 +258,10 @@ namespace TaskFlow.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("TaskFlow.Models.Teamproject", null)
+                        .WithMany("Tasks")
+                        .HasForeignKey("TeamprojectId");
 
                     b.Navigation("Project");
                 });
@@ -234,7 +296,7 @@ namespace TaskFlow.Migrations
                     b.Navigation("TaskItem");
                 });
 
-            modelBuilder.Entity("TaskFlow.Models.AppUser", b =>
+            modelBuilder.Entity("AppUser", b =>
                 {
                     b.Navigation("Projects");
                 });
@@ -252,6 +314,11 @@ namespace TaskFlow.Migrations
             modelBuilder.Entity("TaskFlow.Models.TaskItem", b =>
                 {
                     b.Navigation("Todos");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.Teamproject", b =>
+                {
+                    b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
         }

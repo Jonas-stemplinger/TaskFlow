@@ -21,9 +21,15 @@ namespace TaskFlow.Data
 
         public DbSet<TodoItem> Todos => Set<TodoItem>();
 
+        public DbSet<Teamproject> Teamprojects => Set<Teamproject>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder) //Wenn der Parent gelöscht wird dann gibt es nen Kaskaden Fall quasi der die Kinder auch löscht.
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Teamproject>()
+                .HasMany(t => t.Users)
+                .WithMany(u => u.Teamprojects);
 
             modelBuilder.Entity<Project>()
                 .HasOne(p => p.User)

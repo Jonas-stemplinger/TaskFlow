@@ -111,4 +111,22 @@ public class DashboardService
 
         return true;
     }
+
+
+    public async Task<bool> DeleteDashboardTodoAsync(int userId, int todoId)
+    {
+        var dashboardTodo = await _context.DashboardTodos.FirstOrDefaultAsync(dt => dt.Dashboard.UserId == userId && dt.TodoId == todoId);
+
+        if (dashboardTodo == null)
+        {
+            return false;
+        }
+
+        _context.DashboardTodos.Remove(dashboardTodo);
+
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
 }
