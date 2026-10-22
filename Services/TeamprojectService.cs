@@ -90,5 +90,83 @@ namespace TaskFlow.Services
 
             return "SUCCESS";
         }
+
+        public async Task<bool> UpdateAsync(int teamprojectId, string name)
+        {
+            var teamproject = await _context.Teamprojects.FindAsync(teamprojectId);
+
+            if (teamproject == null)
+            {
+                return false;
+            }
+
+            teamproject.Name = name.Trim();
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(int teamprojectId)
+        {
+            var teamproject = await _context.Teamprojects
+                .FindAsync(teamprojectId);
+
+            if (teamproject == null)
+            {
+                return false;
+            }
+
+            _context.Teamprojects.Remove(teamproject);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<List<AppUser>> GetMembersAsync(int teamprojectId)
+        {
+            var teamproject = await _context.Teamprojects
+                .Include(t => t.Users)
+                .FirstOrDefaultAsync(t => t.Id == teamprojectId);
+
+            if (teamproject == null)
+            {
+                return new List<AppUser>();
+            }
+
+            return teamproject.Users;
+        }
+
+        public async Task<bool> RemoveUserAsync(int teamprojectId, int userId)
+        {
+            var teamproject = await _context.Teamprojects.Include(t => t.Users).FirstOrDefaultAsync(t => t.Id == teamprojectId);
+
+            if (teamproject == null)
+            {
+                return false;
+            }
+
+            var user = teamproject.Users.FirstOrDefault(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            teamproject.Users.Remove(user);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> IsMemberAsync(int teamprojectId, int userId)
+        {
+            return await _context.Teamprojects
+                .AnyAsync(t =>
+                    t.Id == teamprojectId &&
+                    t.Users.Any(u => u.Id == userId));
+        }
     }
 }

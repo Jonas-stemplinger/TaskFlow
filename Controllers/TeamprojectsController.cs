@@ -85,5 +85,64 @@ namespace TaskFlow.Controllers
                 _ => StatusCode(500)
             };
         }
+
+        [HttpPut("{teamprojectId:int}")]
+        public async Task<IActionResult> Update(int userId, int teamprojectId, [FromBody] UpdateTeamprojectRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                return BadRequest("Projektname fehlt.");
+            }
+
+            var updated = await _teamprojectService.UpdateAsync(teamprojectId, request.Name);
+
+            if (!updated)
+            {
+                return NotFound("Teamprojekt nicht gefunden.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{teamprojectId:int}")]
+        public async Task<IActionResult> Delete(int userId, int teamprojectId)
+        {
+            var deleted = await _teamprojectService
+                .DeleteAsync(teamprojectId);
+
+            if (!deleted)
+            {
+                return NotFound("Teamprojekt nicht gefunden.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpGet("{teamprojectId:int}/members")]
+        public async Task<IActionResult> GetMembers(int userId, int teamprojectId)
+        {
+            var members = await _teamprojectService
+                .GetMembersAsync(teamprojectId);
+
+            return Ok(members.Select(u => new
+            {
+                u.Id,
+                u.Name,
+                u.Email
+            }));
+        }
+
+        [HttpDelete("{teamprojectId:int}/members/{memberId:int}")]
+        public async Task<IActionResult> RemoveMember(int userId, int teamprojectId, int memberId)
+        {
+            var removed = await _teamprojectService.RemoveUserAsync(teamprojectId, memberId);
+
+            if (!removed)
+            {
+                return NotFound("Teamprojekt oder Mitglied nicht gefunden.");
+            }
+
+            return NoContent();
+        }
     }
 }
