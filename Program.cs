@@ -19,7 +19,7 @@ builder.Services.AddDbContext<TaskFlowDbContext>(option => option.UseSqlServer(b
 builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TodoService>();
-builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<TeamprojectService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DashboardService>();

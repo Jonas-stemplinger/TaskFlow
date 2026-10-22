@@ -78,6 +78,12 @@ namespace TaskFlow.Data
             modelBuilder.Entity<TaskModelDashboard>()
                 .HasIndex(t => new { t.DashboardId, t.TodoId })
                 .IsUnique();
+
+            modelBuilder.Entity<TaskItem>()
+                .HasOne(t => t.Teamproject)
+                .WithMany(p => p.Tasks)
+                .HasForeignKey(t => t.TeamprojectId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -116,4 +116,30 @@ public class TasksController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet("/api/teamprojects/{teamprojectId:int}/tasks")]
+    public async Task<IActionResult> GetTeamTasks(
+    int teamprojectId)
+    {
+        var tasks = await _service
+            .GetByTeamprojectIdAsync(teamprojectId);
+
+        return Ok(tasks);
+    }
+
+    [HttpPost("/api/teamprojects/{teamprojectId:int}/tasks")]
+    public async Task<IActionResult> CreateTeamTask(
+    int teamprojectId,
+    [FromBody] CreateTaskRequest request)
+    {
+        var task = await _service
+            .CreateForTeamprojectAsync(teamprojectId, request);
+
+        if (task == null)
+        {
+            return NotFound("Teamprojekt nicht gefunden.");
+        }
+
+        return Ok(task);
+    }
 }

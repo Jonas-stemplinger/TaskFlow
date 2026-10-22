@@ -56,5 +56,34 @@ namespace TaskFlow.Controllers
                 p.IsTeamProject
             }));
         }
+
+        [HttpPost("{teamprojectId:int}/members")]
+        public async Task<IActionResult> AddMember(int userId, int teamprojectId, [FromBody] AddUserTeamprojectRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.UserEmail))
+            {
+                return BadRequest("E-Mail-Adresse fehlt.");
+            }
+
+            var result = await _teamprojectService.AddUserAsync(
+                teamprojectId,
+                request.UserEmail);
+
+            return result switch
+            {
+                "SUCCESS" => Ok(new
+                {
+                    message = "Mitglied hinzugefügt."
+                }),
+
+                "PROJECT_NOT_FOUND" => NotFound("Teamprojekt nicht gefunden."),
+
+                "USER_NOT_FOUND" => NotFound("Benutzer nicht gefunden."),
+
+                "ALREADY_MEMBER" => Conflict("Benutzer ist bereits Mitglied."),
+
+                _ => StatusCode(500)
+            };
+        }
     }
 }

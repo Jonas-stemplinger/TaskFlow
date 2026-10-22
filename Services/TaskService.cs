@@ -98,5 +98,38 @@ namespace TaskFlow.Services
 
             return true;
         }
+
+        public async Task<TaskItem?> CreateForTeamprojectAsync(int teamprojectId, CreateTaskRequest request)
+        {
+            var exists = await _db.Teamprojects
+                .AnyAsync(p => p.Id == teamprojectId);
+
+            if (!exists)
+            {
+                return null;
+            }
+
+            var task = new TaskItem
+            {
+                Title = request.Title,
+                IsCompleted = request.IsCompleted,
+                TeamprojectId = teamprojectId
+            };
+
+            _db.Tasks.Add(task);
+
+            await _db.SaveChangesAsync();
+
+            return task;
+        }
+
+        public async Task<List<TaskItem>> GetByTeamprojectIdAsync(int teamprojectId)
+        {
+            return await _db.Tasks
+                .AsNoTracking()
+                .Where(t => t.TeamprojectId == teamprojectId)
+                .OrderBy(t => t.Id)
+                .ToListAsync();
+        }
     }
 }

@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Query;
-
-namespace TaskFlow.Models;
+﻿using TaskFlow.Models;
 
 public class TaskItem
 {
@@ -10,9 +8,15 @@ public class TaskItem
 
     public bool IsCompleted { get; set; }
 
-    public int ProjectId { get; set; }
+    // Normales Projekt
+    public int? ProjectId { get; set; }
 
-    public Project Project { get; set; } = null!;
+    public Project? Project { get; set; }
+
+    // Teamprojekt
+    public int? TeamprojectId { get; set; }
+
+    public Teamproject? Teamproject { get; set; }
 
     public List<TodoItem> Todos { get; set; } = new();
 }

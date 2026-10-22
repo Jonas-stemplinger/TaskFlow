@@ -61,5 +61,34 @@ namespace TaskFlow.Services
                 .Where(t => t.Users.Any(u => u.Id == userId))
                 .ToListAsync();
         }
+
+        public async Task<string> AddUserAsync(int teamprojectId, string email)
+        {
+            var teamproject = await _context.Teamprojects.Include(t => t.Users).FirstOrDefaultAsync(t => t.Id == teamprojectId);
+
+            if (teamproject == null)
+            {
+                return "PROJECT_NOT_FOUND";
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.Trim().ToLower());
+
+            if (user == null)
+            {
+                return "USER_NOT_FOUND";
+            }
+
+            if (teamproject.Users.Any(u => u.Id == user.Id))
+            {
+                return "ALREADY_MEMBER";
+            }
+
+            teamproject.Users.Add(user);
+
+            await _context.SaveChangesAsync();
+
+            return "SUCCESS";
+        }
     }
 }
